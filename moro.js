@@ -22,19 +22,24 @@ const BREAK_DEFAULT = 30
 const setEnd = (args, options, logger) => {
   const end = args.end || moment().format('HH:mm')
   console.log('Your end of the day registered as: ', end)
-  db.updateDatabase(TODAY, null, end, BREAK_DEFAULT, 'setEnd')
+  db.updateDatabase(TODAY, null, end, BREAK_DEFAULT, null, 'setEnd')
 }
 
 const setStart = (args, options, logger) => {
   const start = args.start || moment().format('HH:mm')
   console.log('Your start of the day registered as ', start)
-  db.updateDatabase(TODAY, start, null, BREAK_DEFAULT, 'setStart')
+  db.updateDatabase(TODAY, start, null, BREAK_DEFAULT, null, 'setStart')
 }
 
 const setDuration = (args, options, logger) => {
   const duration = args.duration || 30
   console.log('Break took: ', duration, 'Minutes', ' And will be removed from your work hours')
-  db.updateDatabase(TODAY, null, null, duration, 'setBreakDuration')
+  db.updateDatabase(TODAY, null, null, duration, null, 'setBreakDuration')
+}
+
+const addNote = (args, options, logger) => {
+  const note = args.note || 'notes'
+  db.updateDatabase(TODAY, null, null, null, note, 'addNote')
 }
 
 const report = (args, options, logger, date = TODAY) => {
@@ -98,5 +103,8 @@ prog
   .command('report', 'See what you have done today!')
   .option('--all', 'shows reports for all days')
   .action(report)
+  .command('note', 'optionally add notes about the task at hand')
+  .argument('[note]', 'free form text about taks at hand')
+  .action(addNote)
 
 prog.parse(process.argv)

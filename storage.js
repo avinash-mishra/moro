@@ -2,14 +2,16 @@ const moment = require('moment')
 const path = require('path')
 const osHomedir = require('os-homedir')
 
+// makes a sqlite db if doesn't exists
 const knex = require('knex')({
   dialect: 'sqlite3',
   connection: {
-    filename: path.join(osHomedir(), '.moro-data.db')
+    filename: path.join(osHomedir(), '.moro-database.db')
   },
   useNullAsDefault: true
 })
 
+// without calling this the program doesn't exit
 const destroyKnex = () => {
   knex.destroy()
 }
@@ -20,12 +22,14 @@ const createTable = knex.schema.createTableIfNotExists('records', (table) => {
   table.date('date')
   table.time('start')
   table.time('end')
+  table.text('note')
+  table.text('extra')
   table.integer('breakDuration')
 })
   .catch((e) => console.log('Errors in createTable', e))
 
 const updateDatabase = (
-  date, start, end, breakDuration, action
+  date, start, end, breakDuration, note, action
 ) => {
   // Then query the table...
   createTable
@@ -45,10 +49,12 @@ const updateDatabase = (
             return knex('records').update({end}).where({date})
           case 'setBreakDuration':
             return knex('records').update({breakDuration}).where({date})
+          case 'addNote':
+            return knex('records').update({note}).where({date})
         }
       } else {
         // date doesn't exist, insert it
-        return knex.insert({date, start, end, breakDuration}).into('records')
+        return knex.insert({date, start, end, breakDuration, note}).into('records')
       }
     })
     // Finally, add a .catch handler for the promise chain
